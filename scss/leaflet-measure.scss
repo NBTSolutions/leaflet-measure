@@ -119,3 +119,16 @@ $color-lightertext: #999;
     }
   }
 }
+
+.leaflet-measure-resultpopup {
+  .button-row {
+    .col-xs-6 {
+      &:first-of-type {
+        padding-right: 0px;
+      }
+      &:last-of-type {
+        padding-left: 0px;
+      }
+    }
+  }
+}
