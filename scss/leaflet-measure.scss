@@ -66,31 +66,6 @@ $color-lightertext: #999;
   border-radius: 5px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
 
-  .leaflet-control-measure-toggle, .leaflet-control-measure-toggle:hover {
-    display: block;
-    width: 36px;
-    height: 36px;
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
-    background-image: url(./images/rulers.png);
-    border-radius: 5px;
-
-    // Hide text
-    text-indent: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-
-    .leaflet-retina & {
-      background-image: url(./images/rulers2X.png);
-      background-size: 16px 16px;
-    }
-
-    .leaflet-touch & {
-      width: 44px;
-      height: 44px;
-    }
-  }
-
   // Special styling because start prompt has no content, just header and tasks
   .startprompt {
     h3 {
@@ -141,42 +116,6 @@ $color-lightertext: #999;
   &.measuring {
     a.start {
       content: url('data:image/svg+xml; utf8, <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24"> <path fill="#0f7ec4" d="M0 18.343l5.656 5.657 18.344-18.343-5.657-5.657-18.343 18.343zm21.171-12.686l-15.514 15.514-2.829-2.829 1.04-1.008 2.122 2.122.707-.707-2.122-2.122 1.414-1.414 1.414 1.414.708-.708-1.414-1.414 1.414-1.414 1.414 1.414.707-.707-1.414-1.414 1.414-1.414 2.122 2.122.707-.708-2.121-2.122 1.414-1.414 1.414 1.414.707-.707-1.414-1.414 1.414-1.414 1.414 1.414.707-.707-1.414-1.414 1.414-1.415 2.121 2.122.707-.707-2.121-2.122 1.039-1.071 2.829 2.83z"/> </svg>');
-    }
-  }
-
-  a.cancel {
-    @include iconleading;
-    background-image: url(./images/cancel.png);
-    .leaflet-retina & {
-      background-image: url(./images/cancel2X.png);
-      background-size: 12px 12px;
-    }
-  }
-  a.finish {
-    @include iconleading;
-    background-image: url(./images/check.png);
-    .leaflet-retina & {
-      background-image: url(./images/check2X.png);
-      background-size: 12px 12px;
-    }
-  }
-}
-
-.leaflet-measure-resultpopup {
-  a.zoomto {
-    @include iconleading;
-    background-image: url(./images/focus.png);
-    .leaflet-retina & {
-      background-image: url(./images/focus2X.png);
-      background-size: 12px 12px;
-    }
-  }
-  a.deletemarkup {
-    @include iconleading;
-    background-image: url(./images/trash.png);
-    .leaflet-retina & {
-      background-image: url(./images/trash2X.png);
-      background-size: 11px 12px;
     }
   }
 }
