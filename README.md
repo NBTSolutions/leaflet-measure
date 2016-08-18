@@ -163,6 +163,37 @@ Decimal point and thousands separator used when displaying measurements. If not 
 
 <hr>
 
+## Custom options
+
+Other options added in this NBTSolutions fork of leaflet-measure
+
+### limitLineVertices
+
+`{ limitLineVertices: false }`
+
+When set to true, measurements are output as linear distance only when they have two vertices -- measurements with > 2 vertices will be output as areas.
+When set to false, measurements are output as linear so long as the distance between the starting and ending vertex is greater than the intersection threshold.
+
+### intersectionTreshold
+
+`{ intersectionTreshold: 15 }`
+
+Minimum pixel distance between the starting and ending vertices needed to *close* a polygon measurement.
+
+### clearStaleMeasurements
+
+`{ clearStaleMeasurements: true }`
+
+Remove previous measurement from the map as so as soon as a new one is started.
+
+### popups
+
+`{ popups: true }`
+
+Set to true to use the the popup templates defined in this module. Otherwise bypass them completely and display your results using events.
+
+<hr>
+
 ## Events
 
 You can subscribe to the following events on the [Map](http://leafletjs.com/reference.html#map-class) using [these methods](http://leafletjs.com/reference.html#events)

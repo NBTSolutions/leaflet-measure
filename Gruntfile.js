@@ -105,7 +105,7 @@ module.exports = function (grunt) {
   grunt.registerMultiTask('svg2png', 'Create PNG images from SVG', function () {
     this.files.forEach(function (file) {
       file.src.forEach(function (src) {
-        var png = path.basename(src, '.svg') + '.png', png2x = path.basename(src, '.svg') + '_@2X.png';
+        var png = path.basename(src, '.svg') + '.png', png2x = path.basename(src, '.svg') + '2X.png';
         var dest = path.join(file.dest, png), dest2x = path.join(file.dest, png2x);
         svg2png(src, dest, 0.5);
         svg2png(src, dest2x, 1.0);

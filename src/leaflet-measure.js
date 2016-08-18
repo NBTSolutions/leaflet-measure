@@ -42,14 +42,19 @@ L.Control.Measure = L.Control.extend({
     position: 'topright',
     primaryLengthUnit: 'feet',
     secondaryLengthUnit: 'miles',
-    primaryAreaUnit: 'acres',
-    activeColor: '#ABE67E',     // base color for map features while actively measuring
-    completedColor: '#C8F2BE',  // base color for permenant features generated from completed measure
+    primaryAreaUnit: 'sqmiles',
+    secondaryAreaUnit: 'acres',
+    activeColor: '#0f7ec4',     // base color for map features while actively measuring
+    completedColor: '#0f7ec4',  // base color for permenant features generated from completed measure
     captureZIndex: 10000,       // z-index of the marker used to capture measure events
     popupOptions: {             // standard leaflet popup options http://leafletjs.com/reference.html#popup-options
       className: 'leaflet-measure-resultpopup',
       autoPanPadding: [10, 10]
-    }
+    },
+    limitLineVertices: false,
+    intersectionTreshold: 15,
+    clearStaleMeasurements: true,
+    popups: true
   },
   initialize: function (options) {
     L.setOptions(this, options);
@@ -71,7 +76,7 @@ L.Control.Measure = L.Control.extend({
   },
   _initLayout: function () {
     var className = this._className, container = this._container = L.DomUtil.create('div', className);
-    var $toggle, $start, $cancel, $finish;
+    var /*$toggle,*/ $start, $cancel, $finish;
 
     container.innerHTML = controlTemplate({
       model: {
@@ -90,45 +95,53 @@ L.Control.Measure = L.Control.extend({
       L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
     }
 
-    $toggle = this.$toggle = $('.js-toggle', container);         // collapsed content
+    // $toggle = this.$toggle = $('.js-toggle', container);         // collapsed content
     this.$interaction = $('.js-interaction', container);         // expanded content
     $start = $('.js-start', container);                          // start button
     $cancel = $('.js-cancel', container);                        // cancel button
     $finish = $('.js-finish', container);                        // finish button
-    this.$startPrompt = $('.js-startprompt', container);         // full area with button to start measurment
+    // this.$startPrompt = $('.js-startprompt', container);         // full area with button to start measurment
     this.$measuringPrompt = $('.js-measuringprompt', container); // full area with all stuff for active measurement
-    this.$startHelp = $('.js-starthelp', container);             // "Start creating a measurement by adding points"
+    // this.$startHelp = $('.js-starthelp', container);             // "Start creating a measurement by adding points"
     this.$results = $('.js-results', container);                 // div with coordinate, linear, area results
     this.$measureTasks = $('.js-measuretasks', container);       // active measure buttons container
 
     this._collapse();
     this._updateMeasureNotStarted();
 
-    if (!L.Browser.android) {
-      L.DomEvent.on(container, 'mouseenter', this._expand, this);
-      L.DomEvent.on(container, 'mouseleave', this._collapse, this);
-    }
-    L.DomEvent.on($toggle, 'click', L.DomEvent.stop);
-    if (L.Browser.touch) {
-      L.DomEvent.on($toggle, 'click', this._expand, this);
-    } else {
-      L.DomEvent.on($toggle, 'focus', this._expand, this);
-    }
+    // if (!L.Browser.android) {
+    //   L.DomEvent.on(container, 'mouseenter', this._expand, this);
+    //   L.DomEvent.on(container, 'mouseleave', this._collapse, this);
+    // }
+    // L.DomEvent.on($toggle, 'click', L.DomEvent.stop);
+    // if (L.Browser.touch) {
+    //   L.DomEvent.on($toggle, 'click', this._expand, this);
+    // } else {
+    //   L.DomEvent.on($toggle, 'focus', this._expand, this);
+    // }
     L.DomEvent.on($start, 'click', L.DomEvent.stop);
-    L.DomEvent.on($start, 'click', this._startMeasure, this);
+    L.DomEvent.on($start, 'click', function () {
+      if (!dom.hasClass(this._container, 'measuring')) {
+        dom.addClass(this._container, 'measuring');
+        this._startMeasure();
+      } else {
+        dom.removeClass(this._container, 'measuring');
+        this._handleMeasureDoubleClick();
+      }
+    }, this);
     L.DomEvent.on($cancel, 'click', L.DomEvent.stop);
     L.DomEvent.on($cancel, 'click', this._finishMeasure, this);
     L.DomEvent.on($finish, 'click', L.DomEvent.stop);
     L.DomEvent.on($finish, 'click', this._handleMeasureDoubleClick, this);
   },
   _expand: function () {
-    dom.hide(this.$toggle);
+    // dom.hide(this.$toggle);
     dom.show(this.$interaction);
   },
   _collapse: function () {
     if (!this._locked) {
       dom.hide(this.$interaction);
-      dom.show(this.$toggle);
+      // dom.show(this.$toggle);
     }
   },
   // move between basic states:
@@ -156,6 +169,10 @@ L.Control.Measure = L.Control.extend({
   },
   // get state vars and interface ready for measure
   _startMeasure: function () {
+    if (this.options.clearStaleMeasurements) {
+      this._layer.clearLayers();
+    }
+
     this._locked = true;
     this._measureVertexes = L.featureGroup().addTo(this._layer);
     this._captureMarker = L.marker(this._map.getCenter(), {
@@ -187,7 +204,6 @@ L.Control.Measure = L.Control.extend({
     var model = _.extend({}, this._resultsModel, {
       points: this._latlngs
     });
-
     this._locked = false;
 
     L.DomEvent.off(this._container, 'mouseover', this._handleMapMouseOut, this);
@@ -296,8 +312,13 @@ L.Control.Measure = L.Control.extend({
   },
   // handler for both double click and clicking finish button
   // do final calc and finish out current measure, clear dom and internal state, add permanent map features
-  _handleMeasureDoubleClick: function () {
+  // intersects var passed as true when handler is triggered by _handleMeasureClick
+  _handleMeasureDoubleClick: function (evt, intersects) {
+    dom.removeClass(this._container, 'measuring');
     var latlngs = this._latlngs, calced, resultFeature, popupContainer, popupContent, zoomLink, deleteLink;
+
+    var measureArea = intersects ? true :
+      this.options.limitLineVertices ? latlngs.length > 2 : this._intersects();
 
     this._finishMeasure();
 
@@ -305,7 +326,7 @@ L.Control.Measure = L.Control.extend({
       return;
     }
 
-    if (latlngs.length > 2) {
+    if (measureArea) {
       latlngs.push(_.first(latlngs)); // close path to get full perimeter measurement for areas
     }
 
@@ -318,16 +339,16 @@ L.Control.Measure = L.Control.extend({
         humanize: humanize,
         i18n: i18n
       });
-    } else if (latlngs.length === 2) {
-      resultFeature = L.polyline(latlngs, this._symbols.getSymbol('resultLine'));
-      popupContent = linePopupTemplate({
+    } else if (measureArea) {
+      resultFeature = L.polygon(latlngs, this._symbols.getSymbol('resultArea'));
+      popupContent = areaPopupTemplate({
         model: _.extend({}, calced, this._getMeasurementDisplayStrings(calced)),
         humanize: humanize,
         i18n: i18n
       });
     } else {
-      resultFeature = L.polygon(latlngs, this._symbols.getSymbol('resultArea'));
-      popupContent = areaPopupTemplate({
+      resultFeature = L.polyline(latlngs, this._symbols.getSymbol('resultLine'));
+      popupContent = linePopupTemplate({
         model: _.extend({}, calced, this._getMeasurementDisplayStrings(calced)),
         humanize: humanize,
         i18n: i18n
@@ -358,6 +379,9 @@ L.Control.Measure = L.Control.extend({
     }
 
     resultFeature.addTo(this._layer);
+    if (!this.options.popups) {
+      return;
+    }
     resultFeature.bindPopup(popupContainer, this.options.popupOptions);
     resultFeature.openPopup(resultFeature.getBounds().getCenter());
   },
@@ -386,11 +410,16 @@ L.Control.Measure = L.Control.extend({
       if (this._measureBoundary) {
         this._measureBoundary.bringToFront();
       }
+
       this._measureVertexes.bringToFront();
     }
 
     this._updateResults();
     this._updateMeasureStartedWithPoints();
+
+    if (!this.options.limitLineVertices && this._intersects()) {
+      return this._handleMeasureDoubleClick(evt, true);
+    }
   },
   // handle map mouse out during ongoing measure
   // remove floating cursor vertex from map
@@ -431,6 +460,17 @@ L.Control.Measure = L.Control.extend({
     } else {
       this._measureBoundary.setLatLngs(latlngs);
     }
+  },
+  _intersects: function () {
+    if (this._latlngs.length <= 2) {
+      return false;
+    }
+
+    var pointA = this._map.latLngToLayerPoint(_.last(this._latlngs)),
+      pointB = this._map.latLngToLayerPoint(_.first(this._latlngs)),
+      distance = pointA.distanceTo(pointB);
+
+    return distance <= this.options.intersectionTreshold;
   }
 });
 
