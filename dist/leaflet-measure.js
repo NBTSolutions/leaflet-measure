@@ -240,25 +240,40 @@ var process = module.exports = {};
 var cachedSetTimeout;
 var cachedClearTimeout;
 
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
 (function () {
     try {
-        cachedSetTimeout = setTimeout;
-    } catch (e) {
-        cachedSetTimeout = function () {
-            throw new Error('setTimeout is not defined');
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
         }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
     }
     try {
-        cachedClearTimeout = clearTimeout;
-    } catch (e) {
-        cachedClearTimeout = function () {
-            throw new Error('clearTimeout is not defined');
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
         }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
     }
 } ())
 function runTimeout(fun) {
     if (cachedSetTimeout === setTimeout) {
         //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
         return setTimeout(fun, 0);
     }
     try {
@@ -279,6 +294,11 @@ function runTimeout(fun) {
 function runClearTimeout(marker) {
     if (cachedClearTimeout === clearTimeout) {
         //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
         return clearTimeout(marker);
     }
     try {
@@ -6801,7 +6821,7 @@ L.Control.Measure = L.Control.extend({
   _className: 'leaflet-control-measure',
   options: {
     units: {},
-    position: 'topright',
+    position: 'bottomright',
     primaryLengthUnit: 'feet',
     secondaryLengthUnit: 'miles',
     primaryAreaUnit: 'sqmiles',
@@ -6830,6 +6850,20 @@ L.Control.Measure = L.Control.extend({
     this._initLayout();
     map.on('click', this._collapse, this);
     this._layer = L.layerGroup().addTo(map);
+    map.measure = this._startMeasure;
+    var self = this;
+    map.on('startMeasure', function () {
+      self._startMeasure();
+    });
+    map.on('stopMeasure', function () {
+      if (!this._map) {
+        self._finishMeasure();
+      } else {
+        self._layer.clearLayers();
+        this._map.fire('measurefinish');
+      }
+
+    });
     return this._container;
   },
   onRemove: function (map) {
@@ -6860,6 +6894,7 @@ L.Control.Measure = L.Control.extend({
     // $toggle = this.$toggle = $('.js-toggle', container);         // collapsed content
     this.$interaction = $('.js-interaction', container);         // expanded content
     $start = $('.js-start', container);                          // start button
+    $start.style.display = 'none';
     $cancel = $('.js-cancel', container);                        // cancel button
     $finish = $('.js-finish', container);                        // finish button
     // this.$startPrompt = $('.js-startprompt', container);         // full area with button to start measurment
@@ -6947,19 +6982,24 @@ L.Control.Measure = L.Control.extend({
     this._captureMarker
       .on('mouseout', this._handleMapMouseOut, this)
       .on('dblclick', this._handleMeasureDoubleClick, this)
-      .on('click', this._handleMeasureClick, this);
+      .on('click', this._handleMeasureClick, this)
+      .on('contextmenu', this._handleRightClick, this);
 
     this._map
       .on('mousemove', this._handleMeasureMove, this)
       .on('mouseout', this._handleMapMouseOut, this)
       .on('move', this._centerCaptureMarker, this)
-      .on('resize', this._setCaptureMarkerIcon, this);
+      .on('resize', this._setCaptureMarkerIcon, this)
+      .on('contextmenu', this._doNothing, this);
 
     L.DomEvent.on(this._container, 'mouseenter', this._handleMapMouseOut, this);
 
     this._updateMeasureStartedNoPoints();
 
     this._map.fire('measurestart', null, false);
+  },
+  _doNothing: function () {
+
   },
   // return to state with no measure in progress, undo `this._startMeasure`
   _finishMeasure: function () {
@@ -6975,13 +7015,15 @@ L.Control.Measure = L.Control.extend({
     this._captureMarker
       .off('mouseout', this._handleMapMouseOut, this)
       .off('dblclick', this._handleMeasureDoubleClick, this)
-      .off('click', this._handleMeasureClick, this);
+      .off('click', this._handleMeasureClick, this)
+      .off('contextmenu', this._handleRightClick, this);
 
     this._map
       .off('mousemove', this._handleMeasureMove, this)
       .off('mouseout', this._handleMapMouseOut, this)
       .off('move', this._centerCaptureMarker, this)
-      .off('resize', this._setCaptureMarkerIcon, this);
+      .off('resize', this._setCaptureMarkerIcon, this)
+      .off('contextmenu', this._doNothing, this);
 
     this._layer
       .removeLayer(this._measureVertexes)
@@ -6997,7 +7039,9 @@ L.Control.Measure = L.Control.extend({
   _clearMeasure: function () {
     this._latlngs = [];
     this._resultsModel = null;
-    this._measureVertexes.clearLayers();
+    if (this._measureVertexes) {
+      this._measureVertexes.clearLayers();
+    }
     if (this._measureDrag) {
       this._layer.removeLayer(this._measureDrag);
     }
@@ -7137,6 +7181,7 @@ L.Control.Measure = L.Control.extend({
       L.DomEvent.on(deleteLink, 'click', function () {
         // TODO. maybe remove any event handlers on zoom and delete buttons?
         this._layer.removeLayer(resultFeature);
+        this._map.fire('measurefinish');
       }, this);
     }
 
@@ -7151,8 +7196,8 @@ L.Control.Measure = L.Control.extend({
   // add new clicked point, update measure layers and results ui
   _handleMeasureClick: function (evt) {
     var latlng = this._map.mouseEventToLatLng(evt.originalEvent), // get actual latlng instead of the marker's latlng from originalEvent
-      lastClick = _.last(this._latlngs),
-      vertexSymbol = this._symbols.getSymbol('measureVertex');
+        lastClick = _.last(this._latlngs),
+        vertexSymbol = this._symbols.getSymbol('measureVertex');
 
     if (!lastClick || !latlng.equals(lastClick)) { // skip if same point as last click, happens on `dblclick`
       this._latlngs.push(latlng);
@@ -7181,6 +7226,35 @@ L.Control.Measure = L.Control.extend({
 
     if (!this.options.limitLineVertices && this._intersects()) {
       return this._handleMeasureDoubleClick(evt, true);
+    }
+  },
+
+  _handleRightClick: function () {
+    var lastClick = _.last(this._latlngs);
+
+    if (lastClick) {
+      this._latlngs.pop();
+      if (this._latlngs.length > 0) {
+        this._addMeasureArea(this._latlngs);
+        this._addMeasureBoundary(this._latlngs);
+      }
+
+      var layerIDs = this._measureVertexes.getLayers();
+      this._measureVertexes.removeLayer(layerIDs[layerIDs.length - 1]);
+      if (layerIDs.length > 1) {
+        var lastVertex = _.last(this._latlngs);
+        this._measureVertexes.removeLayer(layerIDs[layerIDs.length - 2]);
+        this._addNewVertex(lastVertex);
+
+        if (this._measureBoundary) {
+          this._measureBoundary.bringToFront();
+        }
+
+        this._measureVertexes.bringToFront();
+
+        this._updateResults();
+        this._updateMeasureStartedWithPoints();
+      }
     }
   },
   // handle map mouse out during ongoing measure
