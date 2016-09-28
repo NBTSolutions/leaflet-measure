@@ -165,17 +165,13 @@ $color-lightertext: #999;
 .leaflet-measure-resultpopup {
   a.zoomto {
     @include iconleading;
-    background-image: url(./images/focus.png);
     .leaflet-retina & {
-      background-image: url(./images/focus2X.png);
       background-size: 12px 12px;
     }
   }
   a.deletemarkup {
     @include iconleading;
-    background-image: url(./images/trash.png);
     .leaflet-retina & {
-      background-image: url(./images/trash2X.png);
       background-size: 11px 12px;
     }
   }

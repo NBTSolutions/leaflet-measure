@@ -6794,11 +6794,11 @@ var $ = dom.$;
 var Symbology = require('./mapsymbology');
 
 
-var controlTemplate = _.template("<!-- <a class=\"<%= model.className %>-toggle js-toggle \" href=\"#\" title=\"<%= i18n.__('measureDistancesAndAreas') %>\"><%= i18n.__('measure') %></a> -->\n<a href=\"#\" class=\"js-start start\"></a>\n<div class=\"<%= model.className %>-interaction js-interaction\">\n<!-- <div class=\"js-startprompt startprompt\">\n    <h3><%= i18n.__('measureDistancesAndAreas') %></h3>\n    <ul class=\"tasks\">\n      <a href=\"#\" class=\"js-start start\"><%= i18n.__('createNewMeasurement') %></a>\n    </ul>\n  </div> -->\n  <div class=\"js-measuringprompt\">\n    <!-- <h3><%= i18n.__('measureDistancesAndAreas') %></h3> -->\n    <!-- <p class=\"js-starthelp\"><%= i18n.__('startCreating') %></p> -->\n    <div class=\"js-results results\"></div>\n    <ul class=\"js-measuretasks tasks\">\n      <li><a href=\"#\" class=\"js-cancel cancel\"><%= i18n.__('cancel') %></a></li>\n      <li><a href=\"#\" class=\"js-finish finish\"><%= i18n.__('finishMeasurement') %></a></li>\n    </ul>\n  </div>\n</div>\n");
-var resultsTemplate = _.template("<div class=\"group\">\n<p class=\"lastpoint heading\"><%= i18n.__('lastPoint') %></p>\n<p><%= model.lastCoord.dms.y %> <span class=\"coorddivider\">/</span> <%= model.lastCoord.dms.x %></p>\n<p><%= humanize.numberFormat(model.lastCoord.dd.y, 6) %> <span class=\"coorddivider\">/</span> <%= humanize.numberFormat(model.lastCoord.dd.x, 6) %></p>\n</div>\n<% if (model.pointCount > 1) { %>\n<div class=\"group\">\n<p><span class=\"heading\"><%= i18n.__('pathDistance') %></span> <%= model.lengthDisplay %></p>\n</div>\n<% } %>\n<% if (model.pointCount > 2) { %>\n<div class=\"group\">\n<p><span class=\"heading\"><%= i18n.__('area') %></span> <%= model.areaDisplay %></p>\n</div>\n<% } %>");
-var pointPopupTemplate = _.template("<p><%= i18n.__('pointLocation') %>: <%= model.lastCoord.dms.y %> <span class=\"coorddivider\">/</span> <%= model.lastCoord.dms.x %></p>\n<ul class=\"tasks\">\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnLocation') %></a></li>\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\n</ul>\n");
-var linePopupTemplate = _.template("<p><%= i18n.__('pathDistance') %>: <%= model.lengthDisplay %></p>\n<ul class=\"tasks\">\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnLine') %></a></li>\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\n</ul>\n");
-var areaPopupTemplate = _.template("<p><%= i18n.__('area') %>: <%= model.areaDisplay %></p>\n<p><%= i18n.__('perimeter') %>: <%= model.lengthDisplay %></p>\n<ul class=\"tasks\">\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnArea') %></a></li>\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\n</ul>\n");
+var controlTemplate = _.template("<!-- <a class=\"<%= model.className %>-toggle js-toggle \" href=\"#\" title=\"<%= i18n.__('measureDistancesAndAreas') %>\"><%= i18n.__('measure') %></a> -->\r\n<a href=\"#\" class=\"js-start start\"></a>\r\n<div class=\"<%= model.className %>-interaction js-interaction\">\r\n<!-- <div class=\"js-startprompt startprompt\">\r\n    <h3><%= i18n.__('measureDistancesAndAreas') %></h3>\r\n    <ul class=\"tasks\">\r\n      <a href=\"#\" class=\"js-start start\"><%= i18n.__('createNewMeasurement') %></a>\r\n    </ul>\r\n  </div> -->\r\n  <div class=\"js-measuringprompt\">\r\n    <!-- <h3><%= i18n.__('measureDistancesAndAreas') %></h3> -->\r\n    <!-- <p class=\"js-starthelp\"><%= i18n.__('startCreating') %></p> -->\r\n    <div class=\"js-results results\"></div>\r\n    <ul class=\"js-measuretasks tasks\">\r\n      <li><a href=\"#\" class=\"js-cancel cancel\"><%= i18n.__('cancel') %></a></li>\r\n      <li><a href=\"#\" class=\"js-finish finish\"><%= i18n.__('finishMeasurement') %></a></li>\r\n    </ul>\r\n  </div>\r\n</div>\r\n");
+var resultsTemplate = _.template("<div class=\"group\">\r\n<p class=\"lastpoint heading\"><%= i18n.__('lastPoint') %></p>\r\n<p><%= model.lastCoord.dms.y %> <span class=\"coorddivider\">/</span> <%= model.lastCoord.dms.x %></p>\r\n<p><%= humanize.numberFormat(model.lastCoord.dd.y, 6) %> <span class=\"coorddivider\">/</span> <%= humanize.numberFormat(model.lastCoord.dd.x, 6) %></p>\r\n</div>\r\n<% if (model.pointCount > 1) { %>\r\n<div class=\"group\">\r\n<p><span class=\"heading\"><%= i18n.__('pathDistance') %></span> <%= model.lengthDisplay %></p>\r\n</div>\r\n<% } %>\r\n<% if (model.pointCount > 2) { %>\r\n<div class=\"group\">\r\n<p><span class=\"heading\"><%= i18n.__('area') %></span> <%= model.areaDisplay %></p>\r\n</div>\r\n<% } %>");
+var pointPopupTemplate = _.template("<p><%= i18n.__('pointLocation') %>: <%= model.lastCoord.dms.y %> <span class=\"coorddivider\">/</span> <%= model.lastCoord.dms.x %></p>\r\n<ul class=\"tasks\">\r\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnLocation') %></a></li>\r\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\r\n</ul>\r\n");
+var linePopupTemplate = _.template("<p><%= i18n.__('pathDistance') %>: <%= model.lengthDisplay %></p>\r\n<ul class=\"tasks\">\r\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnLine') %></a></li>\r\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\r\n</ul>\r\n");
+var areaPopupTemplate = _.template("<p><%= i18n.__('area') %>: <%= model.areaDisplay %></p>\r\n<p><%= i18n.__('perimeter') %>: <%= model.lengthDisplay %></p>\r\n<ul class=\"tasks\">\r\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnArea') %></a></li>\r\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\r\n</ul>\r\n");
 
 var i18n = new (require('i18n-2'))({
   devMode: false,
@@ -6831,7 +6831,8 @@ L.Control.Measure = L.Control.extend({
     captureZIndex: 10000,       // z-index of the marker used to capture measure events
     popupOptions: {             // standard leaflet popup options http://leafletjs.com/reference.html#popup-options
       className: 'leaflet-measure-resultpopup',
-      autoPanPadding: [10, 10]
+      autoPanPadding: [10, 10],
+      closeOnClick: false
     },
     limitLineVertices: false,
     intersectionTreshold: 15,
@@ -6856,14 +6857,27 @@ L.Control.Measure = L.Control.extend({
       self._startMeasure();
     });
     map.on('stopMeasure', function () {
-      if (!this._map) {
-        self._finishMeasure();
-      } else {
+      self._finishMeasure();
+      if (self._map) {
         self._layer.clearLayers();
-        this._map.fire('measurefinish');
       }
-
+      self._map.fire('measurefinish');
     });
+
+    map.on('preferredUnit', function (e) {
+      if (e.preferredUnit === 'metric') {
+        self.options.primaryLengthUnit = 'meters';
+        self.options.secondaryLengthUnit = 'kilometers';
+        self.options.primaryAreaUnit = 'sqmeters';
+        self.options.secondaryAreaUnit = 'hectares';
+      } else {
+        self.options.primaryLengthUnit = 'feet';
+        self.options.secondaryLengthUnit = 'miles';
+        self.options.primaryAreaUnit = 'sqfeet';
+        self.options.secondaryAreaUnit = 'sqmiles';
+      }
+    });
+
     return this._container;
   },
   onRemove: function (map) {
@@ -6966,10 +6980,6 @@ L.Control.Measure = L.Control.extend({
   },
   // get state vars and interface ready for measure
   _startMeasure: function () {
-    if (this.options.clearStaleMeasurements) {
-      this._layer.clearLayers();
-    }
-
     this._locked = true;
     this._measureVertexes = L.featureGroup().addTo(this._layer);
     this._captureMarker = L.marker(this._map.getCenter(), {
@@ -6999,13 +7009,13 @@ L.Control.Measure = L.Control.extend({
     this._map.fire('measurestart', null, false);
   },
   _doNothing: function () {
-
+    return;
   },
   // return to state with no measure in progress, undo `this._startMeasure`
   _finishMeasure: function () {
-    var model = _.extend({}, this._resultsModel, {
-      points: this._latlngs
-    });
+    // var model = _.extend({}, this._resultsModel, {
+    //   points: this._latlngs
+    // });
     this._locked = false;
 
     L.DomEvent.off(this._container, 'mouseover', this._handleMapMouseOut, this);
@@ -7032,8 +7042,6 @@ L.Control.Measure = L.Control.extend({
 
     this._updateMeasureNotStarted();
     this._collapse();
-
-    this._map.fire('measurefinish', model, false);
   },
   // clear all running measure data
   _clearMeasure: function () {
@@ -7181,7 +7189,6 @@ L.Control.Measure = L.Control.extend({
       L.DomEvent.on(deleteLink, 'click', function () {
         // TODO. maybe remove any event handlers on zoom and delete buttons?
         this._layer.removeLayer(resultFeature);
-        this._map.fire('measurefinish');
       }, this);
     }
 
@@ -7190,7 +7197,10 @@ L.Control.Measure = L.Control.extend({
       return;
     }
     resultFeature.bindPopup(popupContainer, this.options.popupOptions);
-    resultFeature.openPopup(resultFeature.getBounds().getCenter());
+    resultFeature._popup.setLatLng(resultFeature.getBounds().getCenter());
+    this._map.addLayer(resultFeature._popup);
+
+    this._startMeasure();
   },
   // handle map click during ongoing measurement
   // add new clicked point, update measure layers and results ui
@@ -7254,6 +7264,8 @@ L.Control.Measure = L.Control.extend({
 
         this._updateResults();
         this._updateMeasureStartedWithPoints();
+      } else {
+        this._updateMeasureStartedNoPoints();
       }
     }
   },

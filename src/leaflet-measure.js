@@ -49,7 +49,8 @@ L.Control.Measure = L.Control.extend({
     captureZIndex: 10000,       // z-index of the marker used to capture measure events
     popupOptions: {             // standard leaflet popup options http://leafletjs.com/reference.html#popup-options
       className: 'leaflet-measure-resultpopup',
-      autoPanPadding: [10, 10]
+      autoPanPadding: [10, 10],
+      closeOnClick: false
     },
     limitLineVertices: false,
     intersectionTreshold: 15,
@@ -74,14 +75,27 @@ L.Control.Measure = L.Control.extend({
       self._startMeasure();
     });
     map.on('stopMeasure', function () {
-      if (!this._map) {
-        self._finishMeasure();
-      } else {
+      self._finishMeasure();
+      if (self._map) {
         self._layer.clearLayers();
-        this._map.fire('measurefinish');
       }
-
+      self._map.fire('measurefinish');
     });
+
+    map.on('preferredUnit', function (e) {
+      if (e.preferredUnit === 'metric') {
+        self.options.primaryLengthUnit = 'meters';
+        self.options.secondaryLengthUnit = 'kilometers';
+        self.options.primaryAreaUnit = 'sqmeters';
+        self.options.secondaryAreaUnit = 'hectares';
+      } else {
+        self.options.primaryLengthUnit = 'feet';
+        self.options.secondaryLengthUnit = 'miles';
+        self.options.primaryAreaUnit = 'sqfeet';
+        self.options.secondaryAreaUnit = 'sqmiles';
+      }
+    });
+
     return this._container;
   },
   onRemove: function (map) {
@@ -184,10 +198,6 @@ L.Control.Measure = L.Control.extend({
   },
   // get state vars and interface ready for measure
   _startMeasure: function () {
-    if (this.options.clearStaleMeasurements) {
-      this._layer.clearLayers();
-    }
-
     this._locked = true;
     this._measureVertexes = L.featureGroup().addTo(this._layer);
     this._captureMarker = L.marker(this._map.getCenter(), {
@@ -217,13 +227,13 @@ L.Control.Measure = L.Control.extend({
     this._map.fire('measurestart', null, false);
   },
   _doNothing: function () {
-
+    return;
   },
   // return to state with no measure in progress, undo `this._startMeasure`
   _finishMeasure: function () {
-    var model = _.extend({}, this._resultsModel, {
-      points: this._latlngs
-    });
+    // var model = _.extend({}, this._resultsModel, {
+    //   points: this._latlngs
+    // });
     this._locked = false;
 
     L.DomEvent.off(this._container, 'mouseover', this._handleMapMouseOut, this);
@@ -250,8 +260,6 @@ L.Control.Measure = L.Control.extend({
 
     this._updateMeasureNotStarted();
     this._collapse();
-
-    this._map.fire('measurefinish', model, false);
   },
   // clear all running measure data
   _clearMeasure: function () {
@@ -399,7 +407,6 @@ L.Control.Measure = L.Control.extend({
       L.DomEvent.on(deleteLink, 'click', function () {
         // TODO. maybe remove any event handlers on zoom and delete buttons?
         this._layer.removeLayer(resultFeature);
-        this._map.fire('measurefinish');
       }, this);
     }
 
@@ -408,7 +415,10 @@ L.Control.Measure = L.Control.extend({
       return;
     }
     resultFeature.bindPopup(popupContainer, this.options.popupOptions);
-    resultFeature.openPopup(resultFeature.getBounds().getCenter());
+    resultFeature._popup.setLatLng(resultFeature.getBounds().getCenter());
+    this._map.addLayer(resultFeature._popup);
+
+    this._startMeasure();
   },
   // handle map click during ongoing measurement
   // add new clicked point, update measure layers and results ui
@@ -472,6 +482,8 @@ L.Control.Measure = L.Control.extend({
 
         this._updateResults();
         this._updateMeasureStartedWithPoints();
+      } else {
+        this._updateMeasureStartedNoPoints();
       }
     }
   },
