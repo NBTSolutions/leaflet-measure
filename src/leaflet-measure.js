@@ -95,7 +95,7 @@ L.Control.Measure = L.Control.extend({
         self.options.secondaryAreaUnit = 'sqmiles';
       }
     });
-    
+
     return this._container;
   },
   onRemove: function (map) {

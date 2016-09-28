@@ -6863,6 +6863,21 @@ L.Control.Measure = L.Control.extend({
       }
       self._map.fire('measurefinish');
     });
+
+    map.on('preferredUnit', function (e) {
+      if (e.preferredUnit === 'metric') {
+        self.options.primaryLengthUnit = 'meters';
+        self.options.secondaryLengthUnit = 'kilometers';
+        self.options.primaryAreaUnit = 'sqmeters';
+        self.options.secondaryAreaUnit = 'hectares';
+      } else {
+        self.options.primaryLengthUnit = 'feet';
+        self.options.secondaryLengthUnit = 'miles';
+        self.options.primaryAreaUnit = 'sqfeet';
+        self.options.secondaryAreaUnit = 'sqmiles';
+      }
+    });
+
     return this._container;
   },
   onRemove: function (map) {
@@ -7250,7 +7265,6 @@ L.Control.Measure = L.Control.extend({
         this._updateResults();
         this._updateMeasureStartedWithPoints();
       } else {
-        this._updateResults();
         this._updateMeasureStartedNoPoints();
       }
     }
