@@ -39,7 +39,7 @@ L.Control.Measure = L.Control.extend({
   _className: 'leaflet-control-measure',
   options: {
     units: {},
-    position: 'bottomright',
+    position: 'topright',
     primaryLengthUnit: 'feet',
     secondaryLengthUnit: 'miles',
     primaryAreaUnit: 'sqmiles',
@@ -126,7 +126,7 @@ L.Control.Measure = L.Control.extend({
     // $toggle = this.$toggle = $('.js-toggle', container);         // collapsed content
     this.$interaction = $('.js-interaction', container);         // expanded content
     $start = $('.js-start', container);                          // start button
-    $start.style.display = 'none';
+    // $start.style.display = 'none';
     $cancel = $('.js-cancel', container);                        // cancel button
     $finish = $('.js-finish', container);                        // finish button
     // this.$startPrompt = $('.js-startprompt', container);         // full area with button to start measurment
