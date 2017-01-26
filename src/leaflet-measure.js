@@ -57,6 +57,7 @@ L.Control.Measure = L.Control.extend({
     clearStaleMeasurements: true,
     popups: true
   },
+  isMapping: false,
   initialize: function (options) {
     L.setOptions(this, options);
     this.options.units = L.extend({}, units, this.options.units);
@@ -73,6 +74,7 @@ L.Control.Measure = L.Control.extend({
     var self = this;
     map.on('startMeasure', function () {
       self._startMeasure();
+      self.isMapping = true;
     });
     map.on('stopMeasure', function () {
       self._finishMeasure();
@@ -80,6 +82,7 @@ L.Control.Measure = L.Control.extend({
         self._layer.clearLayers();
       }
       self._map.fire('measurefinish');
+      self.isMapping = false;
     });
 
     map.on('preferredUnit', function (e) {
@@ -138,24 +141,16 @@ L.Control.Measure = L.Control.extend({
     this._collapse();
     this._updateMeasureNotStarted();
 
-    // if (!L.Browser.android) {
-    //   L.DomEvent.on(container, 'mouseenter', this._expand, this);
-    //   L.DomEvent.on(container, 'mouseleave', this._collapse, this);
-    // }
-    // L.DomEvent.on($toggle, 'click', L.DomEvent.stop);
-    // if (L.Browser.touch) {
-    //   L.DomEvent.on($toggle, 'click', this._expand, this);
-    // } else {
-    //   L.DomEvent.on($toggle, 'focus', this._expand, this);
-    // }
+    var self = this;
     L.DomEvent.on($start, 'click', L.DomEvent.stop);
     L.DomEvent.on($start, 'click', function () {
-      if (!dom.hasClass(this._container, 'measuring')) {
-        dom.addClass(this._container, 'measuring');
-        this._startMeasure();
+      var $button = $('.tool-open-button', container);
+      if (!self.isMapping) {
+        this._map.fire('startMeasure');
+        $button.style.filter = 'invert(100%)';
       } else {
-        dom.removeClass(this._container, 'measuring');
-        this._handleMeasureDoubleClick();
+        this._map.fire('stopMeasure');
+        $button.style.filter = 'invert(0%)';
       }
     }, this);
     L.DomEvent.on($cancel, 'click', L.DomEvent.stop);

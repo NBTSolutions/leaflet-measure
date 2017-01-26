@@ -176,3 +176,13 @@ $color-lightertext: #999;
     }
   }
 }
+
+.tool-open-button{
+  text-align: center;
+  filter: invert(0%);
+  background-color: #FFFFFF;
+
+  &:hover{
+    cursor: pointer;
+  }
+}

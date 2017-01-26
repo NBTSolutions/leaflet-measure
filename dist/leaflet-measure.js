@@ -6794,7 +6794,7 @@ var $ = dom.$;
 var Symbology = require('./mapsymbology');
 
 
-var controlTemplate = _.template("<!-- <a class=\"<%= model.className %>-toggle js-toggle \" href=\"#\" title=\"<%= i18n.__('measureDistancesAndAreas') %>\"><%= i18n.__('measure') %></a> -->\r\n<a href=\"#\" class=\"js-start start\"></a>\r\n<div class=\"<%= model.className %>-interaction js-interaction\">\r\n<!-- <div class=\"js-startprompt startprompt\">\r\n    <h3><%= i18n.__('measureDistancesAndAreas') %></h3>\r\n    <ul class=\"tasks\">\r\n      <a href=\"#\" class=\"js-start start\"><%= i18n.__('createNewMeasurement') %></a>\r\n    </ul>\r\n  </div> -->\r\n  <div class=\"js-measuringprompt\">\r\n    <!-- <h3><%= i18n.__('measureDistancesAndAreas') %></h3> -->\r\n    <!-- <p class=\"js-starthelp\"><%= i18n.__('startCreating') %></p> -->\r\n    <div class=\"js-results results\"></div>\r\n    <ul class=\"js-measuretasks tasks\">\r\n      <li><a href=\"#\" class=\"js-cancel cancel\"><%= i18n.__('cancel') %></a></li>\r\n      <li><a href=\"#\" class=\"js-finish finish\"><%= i18n.__('finishMeasurement') %></a></li>\r\n    </ul>\r\n  </div>\r\n</div>\r\n");
+var controlTemplate = _.template("<!-- <a class=\"<%= model.className %>-toggle js-toggle \" href=\"#\" title=\"<%= i18n.__('measureDistancesAndAreas') %>\"><%= i18n.__('measure') %></a> -->\r\n<div class=\"tool-open-button\">\r\n  <a href=\"#\" class=\"js-start start\"></a>\r\n</div>\r\n<div class=\"<%= model.className %>-interaction js-interaction\">\r\n<!-- <div class=\"js-startprompt startprompt\">\r\n    <h3><%= i18n.__('measureDistancesAndAreas') %></h3>\r\n    <ul class=\"tasks\">\r\n      <a href=\"#\" class=\"js-start start\"><%= i18n.__('createNewMeasurement') %></a>\r\n    </ul>\r\n  </div> -->\r\n  <div class=\"js-measuringprompt\">\r\n    <!-- <h3><%= i18n.__('measureDistancesAndAreas') %></h3> -->\r\n    <!-- <p class=\"js-starthelp\"><%= i18n.__('startCreating') %></p> -->\r\n    <div class=\"js-results results\"></div>\r\n    <ul class=\"js-measuretasks tasks\">\r\n      <li><a href=\"#\" class=\"js-cancel cancel\"><%= i18n.__('cancel') %></a></li>\r\n      <li><a href=\"#\" class=\"js-finish finish\"><%= i18n.__('finishMeasurement') %></a></li>\r\n    </ul>\r\n  </div>\r\n</div>\r\n");
 var resultsTemplate = _.template("<div class=\"group\">\r\n<p class=\"lastpoint heading\"><%= i18n.__('lastPoint') %></p>\r\n<p><%= model.lastCoord.dms.y %> <span class=\"coorddivider\">/</span> <%= model.lastCoord.dms.x %></p>\r\n<p><%= humanize.numberFormat(model.lastCoord.dd.y, 6) %> <span class=\"coorddivider\">/</span> <%= humanize.numberFormat(model.lastCoord.dd.x, 6) %></p>\r\n</div>\r\n<% if (model.pointCount > 1) { %>\r\n<div class=\"group\">\r\n<p><span class=\"heading\"><%= i18n.__('pathDistance') %></span> <%= model.lengthDisplay %></p>\r\n</div>\r\n<% } %>\r\n<% if (model.pointCount > 2) { %>\r\n<div class=\"group\">\r\n<p><span class=\"heading\"><%= i18n.__('area') %></span> <%= model.areaDisplay %></p>\r\n</div>\r\n<% } %>");
 var pointPopupTemplate = _.template("<p><%= i18n.__('pointLocation') %>: <%= model.lastCoord.dms.y %> <span class=\"coorddivider\">/</span> <%= model.lastCoord.dms.x %></p>\r\n<ul class=\"tasks\">\r\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnLocation') %></a></li>\r\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\r\n</ul>\r\n");
 var linePopupTemplate = _.template("<p><%= i18n.__('pathDistance') %>: <%= model.lengthDisplay %></p>\r\n<ul class=\"tasks\">\r\n  <li><a href=\"#\" class=\"js-zoomto zoomto\"><%= i18n.__('centerOnLine') %></a></li>\r\n  <li><a href=\"#\" class=\"js-deletemarkup deletemarkup\"><%= i18n.__('delete') %></a></li>\r\n</ul>\r\n");
@@ -6839,6 +6839,7 @@ L.Control.Measure = L.Control.extend({
     clearStaleMeasurements: true,
     popups: true
   },
+  isMapping: false,
   initialize: function (options) {
     L.setOptions(this, options);
     this.options.units = L.extend({}, units, this.options.units);
@@ -6855,6 +6856,7 @@ L.Control.Measure = L.Control.extend({
     var self = this;
     map.on('startMeasure', function () {
       self._startMeasure();
+      self.isMapping = true;
     });
     map.on('stopMeasure', function () {
       self._finishMeasure();
@@ -6862,6 +6864,7 @@ L.Control.Measure = L.Control.extend({
         self._layer.clearLayers();
       }
       self._map.fire('measurefinish');
+      self.isMapping = false;
     });
 
     map.on('preferredUnit', function (e) {
@@ -6920,24 +6923,16 @@ L.Control.Measure = L.Control.extend({
     this._collapse();
     this._updateMeasureNotStarted();
 
-    // if (!L.Browser.android) {
-    //   L.DomEvent.on(container, 'mouseenter', this._expand, this);
-    //   L.DomEvent.on(container, 'mouseleave', this._collapse, this);
-    // }
-    // L.DomEvent.on($toggle, 'click', L.DomEvent.stop);
-    // if (L.Browser.touch) {
-    //   L.DomEvent.on($toggle, 'click', this._expand, this);
-    // } else {
-    //   L.DomEvent.on($toggle, 'focus', this._expand, this);
-    // }
+    var self = this;
     L.DomEvent.on($start, 'click', L.DomEvent.stop);
     L.DomEvent.on($start, 'click', function () {
-      if (!dom.hasClass(this._container, 'measuring')) {
-        dom.addClass(this._container, 'measuring');
-        this._startMeasure();
+      var $button = $('.tool-open-button', container);
+      if (!self.isMapping) {
+        this._map.fire('startMeasure');
+        $button.style.filter = 'invert(100%)';
       } else {
-        dom.removeClass(this._container, 'measuring');
-        this._handleMeasureDoubleClick();
+        this._map.fire('stopMeasure');
+        $button.style.filter = 'invert(0%)';
       }
     }, this);
     L.DomEvent.on($cancel, 'click', L.DomEvent.stop);
