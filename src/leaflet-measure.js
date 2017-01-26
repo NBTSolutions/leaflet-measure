@@ -67,14 +67,16 @@ L.Control.Measure = L.Control.extend({
   onAdd: function (map) {
     this._map = map;
     this._latlngs = [];
-    this._initLayout();
+    var container = this._initLayout();
     map.on('click', this._collapse, this);
     this._layer = L.layerGroup().addTo(map);
     map.measure = this._startMeasure;
     var self = this;
+    var $button = $('.tool-open-button', container);
     map.on('startMeasure', function () {
       self._startMeasure();
       self.isMapping = true;
+      $button.style.filter = 'invert(75%)';
     });
     map.on('stopMeasure', function () {
       self._finishMeasure();
@@ -83,6 +85,7 @@ L.Control.Measure = L.Control.extend({
       }
       self._map.fire('measurefinish');
       self.isMapping = false;
+      $button.style.filter = 'invert(0%)';
     });
 
     map.on('preferredUnit', function (e) {
@@ -144,19 +147,21 @@ L.Control.Measure = L.Control.extend({
     var self = this;
     L.DomEvent.on($start, 'click', L.DomEvent.stop);
     L.DomEvent.on($start, 'click', function () {
-      var $button = $('.tool-open-button', container);
+
       if (!self.isMapping) {
         this._map.fire('startMeasure');
-        $button.style.filter = 'invert(100%)';
+
       } else {
         this._map.fire('stopMeasure');
-        $button.style.filter = 'invert(0%)';
+
       }
     }, this);
     L.DomEvent.on($cancel, 'click', L.DomEvent.stop);
     L.DomEvent.on($cancel, 'click', this._finishMeasure, this);
     L.DomEvent.on($finish, 'click', L.DomEvent.stop);
     L.DomEvent.on($finish, 'click', this._handleMeasureDoubleClick, this);
+
+    return container;
   },
   _expand: function () {
     // dom.hide(this.$toggle);
