@@ -114,7 +114,8 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', ['jshint', 'jscs']);
-  grunt.registerTask('builddev', ['clean:dist', 'browserify:dev', 'sass:dev', 'svg2png']);
+  grunt.registerTask('build-dev', ['clean:dist', 'browserify:dev', 'sass:dev', 'svg2png']);
+  grunt.registerTask('build-simple', ['test', 'clean:dist', 'browserify:build', 'sass:build', 'svg2png']);
   grunt.registerTask('build', ['test', 'clean:dist', 'browserify:build', 'uglify:build', 'sass:build', 'svg2png']);
 
   grunt.registerTask('default', ['build']);

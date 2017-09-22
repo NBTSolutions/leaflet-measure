@@ -26,7 +26,6 @@
   "author": "LJA Engineering, Inc - GIS <gisdev@ljaengineering.com>",
   "license": "MIT",
   "dependencies": {
-    "brfs": "^1.4.3",
     "color": "^2.0.0",
     "geocrunch": "^0.1.1",
     "humanize": "0.0.9",
@@ -34,6 +33,7 @@
     "underscore": "^1.7.0"
   },
   "devDependencies": {
+    "brfs": "^1.4.3",
     "browserify": "^14.4.0",
     "browserify-shim": "^3.8.12",
     "grunt": "^1.0.1",
