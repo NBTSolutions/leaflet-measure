@@ -21,17 +21,25 @@ var areaPopupTemplate = _.template(fs.readFileSync(__dirname + '/popuptemplates/
 var i18n = new (require('i18n-2'))({
   devMode: false,
   locales: {
-    'cn': require('./i18n/cn'),
-    'de': require('./i18n/de'),
-    'en': require('./i18n/en'),
-    'es': require('./i18n/es'),
-    'fr': require('./i18n/fr'),
-    'it': require('./i18n/it'),
-    'nl': require('./i18n/nl'),
-    'pt_BR': require('./i18n/pt_BR'),
-    'pt_PT': require('./i18n/pt_PT'),
-    'ru': require('./i18n/ru'),
-    'tr': require('./i18n/tr')
+    // 'ca': require('./i18n/ca'),
+    // 'cn': require('./i18n/cn'),
+    // 'da': require('./i18n/da'),
+    // 'de': require('./i18n/de'),
+    // 'de_CH': require('./i18n/de_CH'),
+    // 'en': require('./i18n/en'),
+    'en_UK': require('./i18n/en_UK'),
+    'es': require('./i18n/es')
+    // 'fa': require('./i18n/fa'),
+    // 'fil_PH': require('./i18n/fil_PH'),
+    // 'fr': require('./i18n/fr'),
+    // 'it': require('./i18n/it'),
+    // 'nl': require('./i18n/nl'),
+    // 'pl': require('./i18n/pl'),
+    // 'pt_BR': require('./i18n/pt_BR'),
+    // 'pt_PT': require('./i18n/pt_PT'),
+    // 'ru': require('./i18n/ru'),
+    // 'sv': require('./i18n/sv'),
+    // 'tr': require('./i18n/tr')
   }
 });
 
@@ -394,10 +402,14 @@ L.Control.Measure = L.Control.extend({
     if (zoomLink) {
       L.DomEvent.on(zoomLink, 'click', L.DomEvent.stop);
       L.DomEvent.on(zoomLink, 'click', function () {
-        this._map.fitBounds(resultFeature.getBounds(), {
-          padding: [20, 20],
-          maxZoom: 17
-        });
+        if (resultFeature.getBounds) {
+          this._map.fitBounds(resultFeature.getBounds(), {
+            padding: [20, 20],
+            maxZoom: 17
+          });
+        } else if (resultFeature.getLatLng) {
+          this._map.panTo(resultFeature.getLatLng());
+        }
       }, this);
     }
 
@@ -415,8 +427,11 @@ L.Control.Measure = L.Control.extend({
       return;
     }
     resultFeature.bindPopup(popupContainer, this.options.popupOptions);
-    resultFeature._popup.setLatLng(resultFeature.getBounds().getCenter());
-    this._map.addLayer(resultFeature._popup);
+    if (resultFeature.getBounds) {
+      resultFeature.openPopup(resultFeature.getBounds().getCenter());
+    } else if (resultFeature.getLatLng) {
+      resultFeature.openPopup(resultFeature.getLatLng());
+    }
 
     this._startMeasure();
   },
