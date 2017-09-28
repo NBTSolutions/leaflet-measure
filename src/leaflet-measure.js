@@ -21,25 +21,25 @@ var areaPopupTemplate = _.template(fs.readFileSync(__dirname + '/popuptemplates/
 var i18n = new (require('i18n-2'))({
   devMode: false,
   locales: {
-    // 'ca': require('./i18n/ca'),
-    // 'cn': require('./i18n/cn'),
-    // 'da': require('./i18n/da'),
-    // 'de': require('./i18n/de'),
-    // 'de_CH': require('./i18n/de_CH'),
+    'ca': require('./i18n/ca'),
+    'cn': require('./i18n/cn'),
+    'da': require('./i18n/da'),
+    'de': require('./i18n/de'),
+    'de_CH': require('./i18n/de_CH'),
     'en': require('./i18n/en'),
     'en_UK': require('./i18n/en_UK'),
-    // 'es': require('./i18n/es')
-    // 'fa': require('./i18n/fa'),
-    // 'fil_PH': require('./i18n/fil_PH'),
-    // 'fr': require('./i18n/fr'),
-    // 'it': require('./i18n/it'),
-    // 'nl': require('./i18n/nl'),
-    // 'pl': require('./i18n/pl'),
-    // 'pt_BR': require('./i18n/pt_BR'),
-    // 'pt_PT': require('./i18n/pt_PT'),
-    // 'ru': require('./i18n/ru'),
-    // 'sv': require('./i18n/sv'),
-    // 'tr': require('./i18n/tr')
+    'es': require('./i18n/es')
+    'fa': require('./i18n/fa'),
+    'fil_PH': require('./i18n/fil_PH'),
+    'fr': require('./i18n/fr'),
+    'it': require('./i18n/it'),
+    'nl': require('./i18n/nl'),
+    'pl': require('./i18n/pl'),
+    'pt_BR': require('./i18n/pt_BR'),
+    'pt_PT': require('./i18n/pt_PT'),
+    'ru': require('./i18n/ru'),
+    'sv': require('./i18n/sv'),
+    'tr': require('./i18n/tr')
   }
 });
 
