@@ -5,6 +5,7 @@
   "main": "src/leaflet-measure.js",
   "scripts": {
     "test": "grunt test",
+    "build-simple": "grunt build-simple",
     "build": "grunt build"
   },
   "repository": {
@@ -29,7 +30,7 @@
     "color": "^2.0.0",
     "geocrunch": "^0.1.1",
     "humanize": "0.0.9",
-    "i18n-2": "^0.7.1",
+    "i18n-2": "^0.7.2",
     "underscore": "^1.7.0"
   },
   "devDependencies": {

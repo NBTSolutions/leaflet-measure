@@ -5,7 +5,7 @@
   ],
   "description": "Coordinate, linear, and area measure tool for Leaflet maps",
   "main": [
-    "dist/leaflet-measure.min.js",
+    "dist/leaflet-measure.js",
     "dist/leaflet-measure.css"
   ],
   "repository": {
