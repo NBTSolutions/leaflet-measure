@@ -2423,7 +2423,7 @@ exports.degrees = {
     return result.value;
   };
 
-  // Shuffle an array, using the modern version of the 
+  // Shuffle an array, using the modern version of the
   // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
   _.shuffle = function(obj) {
     var rand;
@@ -3650,7 +3650,7 @@ exports.degrees = {
 
       // Seconds since UNIX epoch
       U: function () { return jsdate.getTime() / 1000 || 0; }
-    };    
+    };
 
     return format.replace(formatChr, formatChrCb);
   };
@@ -3843,7 +3843,7 @@ exports.degrees = {
   /**
    * Replaces line breaks in plain text with appropriate HTML
    * A single newline becomes an HTML line break (<br />) and a new line followed by a blank line becomes a paragraph break (</p>).
-   * 
+   *
    * For example:
    * If value is Joel\nis a\n\nslug, the output will be <p>Joel<br />is a</p><p>slug</p>
    */
@@ -4317,7 +4317,7 @@ i18n.prototype = {
 				debugLog('creating locales dir in: ' + this.directory);
 			}
 
-			fs.mkdirSync(this.directory, 0o755);
+			fs.mkdirSync(this.directory);
 		}
 
 		// Initialize the locale if didn't exist already
@@ -5490,20 +5490,20 @@ var sprintf = (function() {
 
 	// convert object to simple one line string without indentation or
 	// newlines. Note that this implementation does not print array
-	// values to their actual place for sparse arrays. 
+	// values to their actual place for sparse arrays.
 	//
 	// For example sparse array like this
 	//    l = []
 	//    l[4] = 1
 	// Would be printed as "[1]" instead of "[, , , , 1]"
-	// 
-	// If argument 'seen' is not null and array the function will check for 
+	//
+	// If argument 'seen' is not null and array the function will check for
 	// circular object references from argument.
 	str_format.object_stringify = function(obj, depth, maxdepth, seen) {
 		var str = '';
 		if (obj != null) {
 			switch( typeof(obj) ) {
-			case 'function': 
+			case 'function':
 				return '[Function' + (obj.name ? ': '+obj.name : '') + ']';
 			    break;
 			case 'object':
@@ -5527,17 +5527,17 @@ var sprintf = (function() {
 				} else { // object
 					str += '{';
 					var arr = []
-					for (var k in obj) { 
+					for (var k in obj) {
 						if(obj.hasOwnProperty(k)) {
 							if (seen && seen.indexOf(obj[k]) >= 0) arr.push(k + ': [Circular]');
-							else arr.push(k +': ' +str_format.object_stringify(obj[k], depth+1, maxdepth, seen)); 
+							else arr.push(k +': ' +str_format.object_stringify(obj[k], depth+1, maxdepth, seen));
 						}
 					}
 					str += arr.join(', ') + '}';
 				}
 				return str;
 				break;
-			case 'string':				
+			case 'string':
 				return '"' + obj + '"';
 				break
 			}
